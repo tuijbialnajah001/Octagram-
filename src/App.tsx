@@ -70,8 +70,9 @@ export default function App() {
   }, []);
 
   const handleAdminClick = async () => {
+    const adminEmails = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
     if (auth.currentUser) {
-      if (auth.currentUser.email === 'tuijbialnajah@gmail.com') {
+      if (auth.currentUser.email && adminEmails.includes(auth.currentUser.email)) {
         setIsAdminView(true);
       } else {
         alert("You are not authorized as an admin.");
@@ -80,7 +81,7 @@ export default function App() {
       try {
         const provider = new GoogleAuthProvider();
         const res = await signInWithPopup(auth, provider);
-        if (res.user.email === 'tuijbialnajah@gmail.com') {
+        if (res.user.email && adminEmails.includes(res.user.email)) {
           setIsAdminView(true);
         } else {
           alert("You are not authorized as an admin.");
@@ -173,7 +174,8 @@ export default function App() {
           <div className="mt-6">
             <span 
               onClick={handleAdminClick} 
-              className="text-[#111b21] hover:text-[#8696a0]/20 cursor-pointer select-none transition-colors"
+              className="text-[#38464e] hover:text-[#e9edef] cursor-pointer select-none transition-colors text-2xl"
+              title="Admin Login"
             >
               •
             </span>
