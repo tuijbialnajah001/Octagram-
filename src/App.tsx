@@ -5,7 +5,9 @@
 
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, where, getDocFromServer, doc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from './firebase';
+import { auth, db, handleFirestoreError, OperationType } from './firebase';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { AdminDashboard } from './AdminDashboard';
 
 interface Group {
   id: string;
@@ -22,6 +24,7 @@ export default function App() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbConnected, setDbConnected] = useState(true);
+  const [isAdminView, setIsAdminView] = useState(false);
 
   useEffect(() => {
     // Validate connection
@@ -36,6 +39,12 @@ export default function App() {
       }
     }
     testConnection();
+
+    // Re-check authentication context when component mounts
+    auth.onAuthStateChanged((user) => {
+      // If user is logged in as admin but refreshed the page, we can optionally default them to admin view
+      // But keeping it false is fine, they can click the hidden button again.
+    });
 
     const q = query(collection(db, 'groups'), where('isPublic', '==', true));
     
@@ -59,6 +68,34 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
+
+  const handleAdminClick = async () => {
+    if (auth.currentUser) {
+      if (auth.currentUser.email === 'tuijbialnajah@gmail.com') {
+        setIsAdminView(true);
+      } else {
+        alert("You are not authorized as an admin.");
+      }
+    } else {
+      try {
+        const provider = new GoogleAuthProvider();
+        const res = await signInWithPopup(auth, provider);
+        if (res.user.email === 'tuijbialnajah@gmail.com') {
+          setIsAdminView(true);
+        } else {
+          alert("You are not authorized as an admin.");
+          await auth.signOut();
+        }
+      } catch (error) {
+        console.error("Login failed", error);
+      }
+    }
+  };
+
+  if (isAdminView) {
+    return <AdminDashboard onExit={() => setIsAdminView(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#111b21] text-white py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto">
@@ -133,6 +170,14 @@ export default function App() {
           <p className="text-lg text-[#8696a0] max-w-3xl mx-auto font-medium">
             We are not merely a gathering of enthusiasts. We are an alliance — a brotherhood and sisterhood united under the banner of anime.
           </p>
+          <div className="mt-6">
+            <span 
+              onClick={handleAdminClick} 
+              className="text-[#111b21] hover:text-[#8696a0]/20 cursor-pointer select-none transition-colors"
+            >
+              •
+            </span>
+          </div>
         </div>
       </div>
     </div>

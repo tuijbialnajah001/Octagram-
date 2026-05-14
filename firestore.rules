@@ -2,15 +2,19 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == "tuijbialnajah@gmail.com";
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
     
     match /groups/{groupId} {
-      allow get: if resource.data.isPublic == true;
-      allow list: if resource.data.isPublic == true;
-      // Only managed via Firebase Console, no client writes allowed.
-      allow write: if false;
+      allow get: if resource.data.isPublic == true || isAdmin();
+      allow list: if resource.data.isPublic == true || isAdmin();
+      // Allow writes for admin
+      allow write: if isAdmin();
     }
   }
 }
