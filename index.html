@@ -2,12 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="https://files.catbox.moe/1weq5j.jpg" />
+    <link rel="apple-touch-icon" href="https://files.catbox.moe/1weq5j.jpg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#00a884" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
   </body>
 </html>
 
