@@ -73,7 +73,7 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#111b21] text-white p-4 sm:p-8 font-sans">
+    <div className="min-h-[100dvh] bg-[#111b21] text-white pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] px-4 sm:px-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>

@@ -4,7 +4,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#111b21",
-  "theme_color": "#00a884",
+  "theme_color": "#111b21",
   "description": "An alliance united under the banner of anime.",
   "icons": [
     {

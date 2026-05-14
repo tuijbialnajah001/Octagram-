@@ -107,7 +107,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111b21] text-white py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-[100dvh] bg-[#111b21] text-white pt-[calc(3rem+env(safe-area-inset-top))] pb-[calc(3rem+env(safe-area-inset-bottom))] px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-4">
