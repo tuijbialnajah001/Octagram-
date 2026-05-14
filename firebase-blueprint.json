@@ -1,0 +1,25 @@
+{
+  "entities": {
+    "Group": {
+      "title": "Group",
+      "description": "WhatsApp group information.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "time": { "type": "string" },
+        "joinLink": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["title", "imageUrl", "joinLink", "isPublic"]
+    }
+  },
+  "firestore": {
+    "/groups/{groupId}": {
+      "schema": { "$ref": "#/entities/Group" },
+      "description": "Public WhatsApp groups."
+    }
+  }
+}

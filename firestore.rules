@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    match /groups/{groupId} {
+      allow get: if resource.data.isPublic == true;
+      allow list: if resource.data.isPublic == true;
+      // Only managed via Firebase Console, no client writes allowed.
+      allow write: if false;
+    }
+  }
+}
