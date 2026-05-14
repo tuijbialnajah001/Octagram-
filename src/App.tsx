@@ -8,6 +8,7 @@ import { collection, onSnapshot, query, where, getDocFromServer, doc } from 'fir
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { AdminDashboard } from './AdminDashboard';
+import { Lock, LayoutDashboard } from 'lucide-react';
 
 interface Group {
   id: string;
@@ -20,11 +21,14 @@ interface Group {
   createdAt: number;
 }
 
+const ADMIN_EMAILS = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
+
 export default function App() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbConnected, setDbConnected] = useState(true);
   const [isAdminView, setIsAdminView] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
 
   useEffect(() => {
     // Validate connection
@@ -41,9 +45,12 @@ export default function App() {
     testConnection();
 
     // Re-check authentication context when component mounts
-    auth.onAuthStateChanged((user) => {
-      // If user is logged in as admin but refreshed the page, we can optionally default them to admin view
-      // But keeping it false is fine, they can click the hidden button again.
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user?.email && ADMIN_EMAILS.includes(user.email)) {
+        setIsAdminUser(true);
+      } else {
+        setIsAdminUser(false);
+      }
     });
 
     const q = query(collection(db, 'groups'), where('isPublic', '==', true));
@@ -66,13 +73,15 @@ export default function App() {
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      unsubscribeAuth();
+    };
   }, []);
 
   const handleAdminClick = async () => {
-    const adminEmails = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
     if (auth.currentUser) {
-      if (auth.currentUser.email && adminEmails.includes(auth.currentUser.email)) {
+      if (auth.currentUser.email && ADMIN_EMAILS.includes(auth.currentUser.email)) {
         setIsAdminView(true);
       } else {
         alert("You are not authorized as an admin.");
@@ -81,7 +90,7 @@ export default function App() {
       try {
         const provider = new GoogleAuthProvider();
         const res = await signInWithPopup(auth, provider);
-        if (res.user.email && adminEmails.includes(res.user.email)) {
+        if (res.user.email && ADMIN_EMAILS.includes(res.user.email)) {
           setIsAdminView(true);
         } else {
           alert("You are not authorized as an admin.");
@@ -104,6 +113,15 @@ export default function App() {
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-4">
             𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
           </h1>
+          {isAdminUser && (
+            <button
+              onClick={() => setIsAdminView(true)}
+              className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 bg-[#00a884] text-[#111b21] rounded-full font-medium hover:bg-[#00a884]/90 transition-colors shadow-lg"
+            >
+              <LayoutDashboard size={20} />
+              Go to Admin Dashboard
+            </button>
+          )}
         </div>
 
         {!dbConnected && (
@@ -168,17 +186,18 @@ export default function App() {
         )}
 
         <div className="mt-16 text-center">
-          <p className="text-lg text-[#8696a0] max-w-3xl mx-auto font-medium">
+          <p className="text-lg text-[#8696a0] max-w-3xl mx-auto font-medium mb-8">
             We are not merely a gathering of enthusiasts. We are an alliance — a brotherhood and sisterhood united under the banner of anime.
           </p>
-          <div className="mt-6">
-            <span 
+          <div className="flex justify-center">
+            <button 
               onClick={handleAdminClick} 
-              className="text-[#38464e] hover:text-[#e9edef] cursor-pointer select-none transition-colors text-2xl"
-              title="Admin Login"
+              className="flex items-center gap-2 text-[#38464e] hover:text-[#00a884] transition-colors text-sm font-medium"
+              title="Admin Access"
             >
-              •
-            </span>
+              <Lock size={16} />
+              {isAdminUser ? 'Enter Admin Dashboard' : 'Admin Login'}
+            </button>
           </div>
         </div>
       </div>
