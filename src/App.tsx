@@ -10,7 +10,7 @@ const MOCK_GROUPS = [
   {
     id: 1,
     title: 'BJE ~ Clan',
-    description: 'Group in "Kҽɳƈԋσ Aʅʅιαɳƈҽ"',
+    description: 'Group in "𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠"',
     imageUrl: 'https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=800&auto=format&fit=crop',
     time: '4:11 pm',
     joinLink: '#',
@@ -18,7 +18,7 @@ const MOCK_GROUPS = [
   {
     id: 2,
     title: 'Anime Enthusiasts',
-    description: 'Group in "Kҽɳƈԋσ Aʅʅιαɳƈҽ"',
+    description: 'Group in "𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠"',
     imageUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=800&auto=format&fit=crop',
     time: '2:30 pm',
     joinLink: '#',
@@ -26,7 +26,7 @@ const MOCK_GROUPS = [
   {
     id: 3,
     title: 'Gaming Squad',
-    description: 'Group in "Kҽɳƈԋσ Aʅʅιαɳƈҽ"',
+    description: 'Group in "𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠"',
     imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop',
     time: '11:45 am',
     joinLink: '#',
@@ -34,25 +34,9 @@ const MOCK_GROUPS = [
   {
     id: 4,
     title: 'Movie Nights',
-    description: 'Group in "Kҽɳƈԋσ Aʅʅιαɳƈҽ"',
+    description: 'Group in "𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠"',
     imageUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=800&auto=format&fit=crop',
     time: 'Yesterday',
-    joinLink: '#',
-  },
-  {
-    id: 5,
-    title: 'Study Corner',
-    description: 'Group in "Kҽɳƈԋσ Aʅʅιαɳƈҽ"',
-    imageUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=800&auto=format&fit=crop',
-    time: 'Sunday',
-    joinLink: '#',
-  },
-  {
-    id: 6,
-    title: 'Music Lounge',
-    description: 'Group in "Kҽɳƈԋσ Aʅʅιαɳƈҽ"',
-    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop',
-    time: 'Friday',
     joinLink: '#',
   }
 ];
@@ -60,17 +44,14 @@ const MOCK_GROUPS = [
 export default function App() {
   return (
     <div className="min-h-screen bg-[#111b21] text-white py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-4">
-            Kҽɳƈԋσ Aʅʅιαɳƈҽ Community
+            𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
           </h1>
-          <p className="text-xl text-[#8696a0] max-w-2xl mx-auto">
-            Discover and join our various sub-groups. Find your niche and connect with like-minded members.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {MOCK_GROUPS.map((group) => (
             <div 
               key={group.id} 
@@ -111,6 +92,12 @@ export default function App() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-16 text-center">
+          <p className="text-lg text-[#8696a0] max-w-3xl mx-auto font-medium">
+            We are not merely a gathering of enthusiasts. We are an alliance — a brotherhood and sisterhood united under the banner of anime.
+          </p>
         </div>
       </div>
     </div>
