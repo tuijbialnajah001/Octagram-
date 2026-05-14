@@ -8,15 +8,15 @@
   "description": "An alliance united under the banner of anime.",
   "icons": [
     {
-      "src": "https://files.catbox.moe/1weq5j.jpg",
+      "src": "https://files.catbox.moe/vzi8kx.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://files.catbox.moe/1weq5j.jpg",
+      "src": "https://files.catbox.moe/vzi8kx.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
