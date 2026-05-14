@@ -3,18 +3,62 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { collection, onSnapshot, query, where, getDocFromServer, doc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from './firebase';
 
-const GROUPS = [
-  {
-    id: '1',
-    title: '𝕽𝖊𝖆𝖑𝖒 𝕺𝖋 𝕯𝖊𝖑𝖚𝖘𝖎𝖔𝖓𝖘',
-    imageUrl: '/realm.jpg', // You will need to upload the image to the public folder
-    joinLink: 'https://chat.whatsapp.com/Kkmoqk2D2iM1HVC2bnqt6v',
-  }
-];
+interface Group {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  time: string;
+  joinLink: string;
+  isPublic: boolean;
+  createdAt: number;
+}
 
 export default function App() {
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dbConnected, setDbConnected] = useState(true);
+
+  useEffect(() => {
+    // Validate connection
+    async function testConnection() {
+      try {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('the client is offline')) {
+          setDbConnected(false);
+          console.error("Please check your Firebase configuration.");
+        }
+      }
+    }
+    testConnection();
+
+    const q = query(collection(db, 'groups'), where('isPublic', '==', true));
+    
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetchGroups = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Group[];
+        // Sort by createdAt descending locally since we don't have a composite index for it yet
+        fetchGroups.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        setGroups(fetchGroups);
+        setLoading(false);
+      },
+      (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'groups');
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
   return (
     <div className="min-h-screen bg-[#111b21] text-white py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto">
@@ -24,8 +68,28 @@ export default function App() {
           </h1>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-6">
-          {GROUPS.map((group) => (
+        {!dbConnected && (
+          <div className="text-center p-6 bg-red-900/50 rounded-xl border border-red-500/50 mb-8 max-w-lg mx-auto">
+            <h2 className="text-xl font-bold text-red-200 mb-2">Connection Error</h2>
+            <p className="text-red-300">Could not connect to Firebase. Please check your setup.</p>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00a884]"></div>
+          </div>
+        ) : groups.length === 0 ? (
+          <div className="text-center py-16 bg-[#202c33] rounded-2xl border border-[#38464e]">
+            <h3 className="text-xl text-[#e9edef] font-medium mb-2">No groups available</h3>
+            <p className="text-[#8696a0]">
+              Please add groups via your Firebase Console in the "groups" collection.
+              Remember to set <code className="bg-[#111b21] px-1.5 py-0.5 rounded">isPublic: true</code> for them to appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:gap-6">
+            {groups.map((group) => (
             <div 
               key={group.id} 
               className="bg-[#202c33] rounded-2xl overflow-hidden flex flex-col shadow-lg border border-[#202c33] hover:border-[#38464e] transition-colors"
@@ -62,6 +126,7 @@ export default function App() {
             </div>
           ))}
         </div>
+        )}
 
         <div className="mt-16 text-center">
           <p className="text-lg text-[#8696a0] max-w-3xl mx-auto font-medium">
