@@ -9,7 +9,7 @@ const GROUPS = [
   {
     id: '1',
     title: '𝕽𝖊𝖆𝖑𝖒 𝕺𝖋 𝕯𝖊𝖑𝖚𝖘𝖎𝖔𝖓𝖘',
-    imageUrl: 'https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=800&auto=format&fit=crop', // Temporary placeholder image
+    imageUrl: '/realm.jpg', // You will need to upload the image to the public folder
     joinLink: 'https://chat.whatsapp.com/Kkmoqk2D2iM1HVC2bnqt6v',
   }
 ];
