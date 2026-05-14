@@ -95,10 +95,11 @@ export default function App() {
               className="bg-[#202c33] rounded-2xl overflow-hidden flex flex-col shadow-lg border border-[#202c33] hover:border-[#38464e] transition-colors"
             >
               {/* Cover Image */}
-              <div className="relative h-28 sm:h-48 w-full">
+              <div className="relative aspect-square w-full">
                 <img 
                   src={group.imageUrl} 
-                  alt={group.title} 
+                  alt={group.title}
+                  loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
