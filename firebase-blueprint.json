@@ -14,12 +14,27 @@
         "createdAt": { "type": "number" }
       },
       "required": ["title", "imageUrl", "joinLink", "isPublic"]
+    },
+    "DailyStat": {
+      "title": "Daily Stat",
+      "description": "Website visits indexed by date.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "count": { "type": "number" }
+      },
+      "required": ["date", "timestamp", "count"]
     }
   },
   "firestore": {
     "/groups/{groupId}": {
       "schema": { "$ref": "#/entities/Group" },
       "description": "Public WhatsApp groups."
+    },
+    "/daily_stats/{dateStr}": {
+      "schema": { "$ref": "#/entities/DailyStat" },
+      "description": "Stats aggregated by day."
     }
   }
 }

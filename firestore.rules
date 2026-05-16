@@ -16,5 +16,10 @@ service cloud.firestore {
       // Allow writes for admin
       allow write: if isAdmin();
     }
+    
+    match /daily_stats/{dateStr} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }
