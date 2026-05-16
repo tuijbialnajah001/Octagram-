@@ -83,7 +83,7 @@ export function StatsView({ onBack }: StatsViewProps) {
   return (
     <div className="min-h-[100dvh] bg-[#111b21] text-white font-sans flex flex-col relative selection:bg-[#00a884] selection:text-white pb-[calc(3rem+env(safe-area-inset-bottom))]">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-[#111b21]/85 backdrop-blur-xl border-b border-[#202c33] shadow-sm pt-[env(safe-area-inset-top)]">
+      <header className="sticky top-0 z-50 w-full bg-[#111b21] border-b border-[#202c33] shadow-sm pt-[env(safe-area-inset-top)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex-1 flex justify-start">
             <button
@@ -121,7 +121,7 @@ export function StatsView({ onBack }: StatsViewProps) {
             </div>
 
             {/* Chart Area */}
-            <div className="bg-[#202c33] border border-[#38464e]/50 rounded-3xl p-5 sm:p-7 shadow-xl shadow-black/20">
+            <div className="bg-[#202c33] border border-[#38464e]/50 rounded-2xl sm:rounded-3xl p-4 sm:p-7">
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-[#e9edef] flex items-center gap-2">
                   <Activity size={18} className="text-[#00a884]" />
@@ -190,16 +190,13 @@ export function StatsView({ onBack }: StatsViewProps) {
 
 function StatCard({ label, value, icon, primary = false }: { label: string; value: number; icon: React.ReactNode; primary?: boolean }) {
   return (
-    <div className={`p-5 sm:p-6 rounded-3xl border flex flex-col shadow-lg transition-transform hover:-translate-y-1 ${
+    <div className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl border flex flex-col ${
       primary 
-        ? "bg-gradient-to-br from-[#00a884]/20 to-[#202c33] border-[#00a884]/40 relative overflow-hidden" 
+        ? "bg-[#202c33] border-[#00a884]/40 relative overflow-hidden" 
         : "bg-[#202c33] border-[#38464e]/50"
     }`}>
-      {primary && (
-        <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#00a884]/20 blur-2xl rounded-full"></div>
-      )}
       <div className="flex items-center gap-3 mb-4">
-        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${primary ? 'bg-[#00a884]/20' : 'bg-[#111b21]'}`}>
+        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${primary ? 'bg-[#00a884]/10' : 'bg-[#111b21]'}`}>
           {icon}
         </div>
         <h3 className="text-[#8696a0] font-medium text-sm sm:text-base">{label}</h3>
