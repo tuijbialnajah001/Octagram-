@@ -9,7 +9,7 @@ import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { AdminDashboard } from './AdminDashboard';
 import { StatsView } from './StatsView';
-import { Lock, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { Lock, LayoutDashboard, BarChart3, Download } from 'lucide-react';
 
 interface Group {
   id: string;
@@ -31,6 +31,22 @@ export default function App() {
   const [isAdminView, setIsAdminView] = useState(false);
   const [isStatsView, setIsStatsView] = useState(false);
   const [isAdminUser, setIsAdminUser] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
 
   useEffect(() => {
     // Record visit
@@ -125,6 +141,15 @@ export default function App() {
     }
   };
 
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
+
   if (isAdminView) {
     return <AdminDashboard onExit={() => setIsAdminView(false)} />;
   }
@@ -150,7 +175,16 @@ export default function App() {
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-md">
             𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
           </h1>
-          <div className="flex-1 flex justify-end">
+          <div className="flex-1 flex justify-end gap-2">
+          {deferredPrompt && (
+            <button
+              onClick={handleInstallClick}
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#00a884] text-[#111b21] rounded-full text-sm font-bold hover:bg-[#00c59b] transition-colors shadow-lg shadow-[#00a884]/20"
+            >
+              <Download size={16} />
+              <span className="hidden sm:inline">Install App</span>
+            </button>
+          )}
           {isAdminUser && (
             <button
               onClick={() => setIsAdminView(true)}
