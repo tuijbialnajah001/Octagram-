@@ -27,8 +27,24 @@
       },
       "required": ["date", "timestamp", "count"]
     }
+    "LinkRequest": {
+      "title": "Link Request",
+      "description": "Request for a new join link if the current one is broken.",
+      "type": "object",
+      "properties": {
+        "groupId": { "type": "string" },
+        "groupTitle": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "resolved"] },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["groupId", "groupTitle", "status", "createdAt"]
+    }
   },
   "firestore": {
+    "/link_requests/{requestId}": {
+      "schema": { "$ref": "#/entities/LinkRequest" },
+      "description": "Requests for new group links."
+    },
     "/groups/{groupId}": {
       "schema": { "$ref": "#/entities/Group" },
       "description": "Public WhatsApp groups."

@@ -23,12 +23,21 @@ const COMMUNITIES = [
   '𝙱𝙹𝙴 ~ Clan'
 ];
 
+interface LinkRequest {
+  id: string;
+  groupId: string;
+  groupTitle: string;
+  status: string;
+  createdAt: number;
+}
+
 export function AdminDashboard({ onExit }: { onExit: () => void }) {
   const [groups, setGroups] = useState<Group[]>([]);
+  const [linkRequests, setLinkRequests] = useState<LinkRequest[]>([]);
   const [editingGroup, setEditingGroup] = useState<Partial<Group> | null>(null);
   
   useEffect(() => {
-    const unsubscribe = onSnapshot(
+    const unsubscribeGroups = onSnapshot(
       collection(db, 'groups'),
       (snapshot) => {
         const fetchGroups = snapshot.docs.map((doc) => ({
@@ -40,7 +49,24 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
       },
       (error) => handleFirestoreError(error, OperationType.LIST, 'groups')
     );
-    return () => unsubscribe();
+
+    const unsubscribeRequests = onSnapshot(
+      collection(db, 'link_requests'),
+      (snapshot) => {
+        const fetchRequests = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        })) as LinkRequest[];
+        fetchRequests.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        setLinkRequests(fetchRequests);
+      },
+      (error) => console.error("Error fetching link requests:", error)
+    );
+
+    return () => {
+      unsubscribeGroups();
+      unsubscribeRequests();
+    };
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -51,6 +77,11 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
       if (editingGroup.id) {
         // Update existing
         await updateDoc(doc(db, 'groups', editingGroup.id), editingGroup);
+        // Automatically dismiss any requests for this group
+        const requestsToDismiss = linkRequests.filter(r => r.groupId === editingGroup.id);
+        for (const req of requestsToDismiss) {
+          await deleteDoc(doc(db, 'link_requests', req.id));
+        }
       } else {
         // Create new
         const id = editingGroup.title?.toLowerCase().replace(/\s+/g, '-') || Date.now().toString();
@@ -81,6 +112,14 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
     }
   };
 
+  const handleResolveRequest = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'link_requests', id));
+    } catch (err) {
+      console.error("Error resolving request:", err);
+    }
+  };
+
   return (
     <div className="min-h-[100dvh] bg-[#111b21] text-white pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] px-4 sm:px-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -104,6 +143,42 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
             </button>
           </div>
         </div>
+
+        {linkRequests.length > 0 && (
+          <div className="bg-[#2a3942] rounded-xl p-6 border border-[#38464e]">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-red-400">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              Link Reset Requests ({linkRequests.length})
+            </h2>
+            <div className="space-y-3">
+              {linkRequests.map(request => (
+                <div key={request.id} className="flex items-center justify-between bg-[#202c33] p-4 rounded-lg border border-red-500/20 flex-wrap gap-4">
+                  <div>
+                    <h3 className="font-medium text-white">{request.groupTitle}</h3>
+                    <p className="text-sm text-[#8696a0]">Requested: {new Date(request.createdAt).toLocaleString()}</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        const groupToEdit = groups.find(g => g.id === request.groupId);
+                        if (groupToEdit) setEditingGroup(groupToEdit);
+                      }}
+                      className="px-3 py-1.5 bg-[#00a884]/10 text-[#00a884] rounded hover:bg-[#00a884]/20 transition-colors text-sm font-medium"
+                    >
+                      Update Link
+                    </button>
+                    <button
+                      onClick={() => handleResolveRequest(request.id)}
+                      className="px-3 py-1.5 bg-gray-500/10 text-gray-300 rounded hover:bg-gray-500/20 transition-colors text-sm font-medium"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {editingGroup ? (
           <form onSubmit={handleSave} className="bg-[#202c33] p-6 rounded-xl space-y-4">

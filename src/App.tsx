@@ -40,6 +40,23 @@ export default function App() {
   const [isStatsView, setIsStatsView] = useState(false);
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [requestedLinks, setRequestedLinks] = useState<Set<string>>(new Set());
+
+  const handleRequestLink = async (group: Group) => {
+    if (requestedLinks.has(group.id)) return;
+    try {
+      const requestRef = doc(collection(db, 'link_requests'));
+      await setDoc(requestRef, {
+        groupId: group.id,
+        groupTitle: group.title,
+        status: 'pending',
+        createdAt: Date.now()
+      });
+      setRequestedLinks(prev => new Set(prev).add(group.id));
+    } catch (error) {
+      console.error("Error requesting link:", error);
+    }
+  };
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
@@ -266,7 +283,7 @@ export default function App() {
                         </div>
 
                         {/* Action Button */}
-                        <div className="mt-auto px-2 pb-2 sm:px-5 sm:pb-5 text-center">
+                        <div className="mt-auto px-2 pb-2 sm:px-5 sm:pb-5 text-center flex flex-col gap-1.5 sm:gap-2">
                           <a
                             href={group.joinLink}
                             target="_blank"
@@ -275,6 +292,13 @@ export default function App() {
                           >
                             Join
                           </a>
+                          <button
+                            onClick={() => handleRequestLink(group)}
+                            disabled={requestedLinks.has(group.id)}
+                            className="block w-full py-1.5 sm:py-2 bg-transparent text-red-500 font-semibold text-[9px] sm:text-[13px] rounded-md sm:rounded-2xl border border-red-500/50 hover:bg-red-500/10 transition-colors active:opacity-80 truncate disabled:opacity-50 disabled:border-gray-500 disabled:text-gray-400 disabled:hover:bg-transparent"
+                          >
+                            {requestedLinks.has(group.id) ? 'Requested' : 'Request new link'}
+                          </button>
                         </div>
                       </div>
                     </div>

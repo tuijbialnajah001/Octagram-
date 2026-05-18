@@ -21,5 +21,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+    
+    match /link_requests/{requestId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
   }
 }
