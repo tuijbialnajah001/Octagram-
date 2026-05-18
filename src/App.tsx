@@ -197,7 +197,7 @@ export default function App() {
               <span className="hidden sm:inline">Stats</span>
             </button>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-md">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
             𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
           </h1>
           <div className="flex-1 flex justify-end gap-2">
@@ -256,12 +256,15 @@ export default function App() {
                     <h2 className="text-lg sm:text-2xl font-bold text-white tracking-wide">{community}</h2>
                     <div className="flex-1 h-[1px] bg-gradient-to-r from-[#00a884]/40 to-transparent"></div>
                   </div>
-                  <div className="relative -mx-4 sm:mx-0">
-                    <div className="flex overflow-x-auto pb-4 px-4 sm:px-0 gap-3 sm:gap-4 lg:gap-6 snap-x snap-mandatory scrollbar-hide scroll-smooth after:content-[''] after:shrink-0 after:w-1 sm:after:w-0">
+                  <div className="relative -mx-4 sm:mx-0 pr-4 sm:pr-0">
+                    <div 
+                      className="flex overflow-x-auto pb-4 px-4 sm:px-0 gap-3 sm:gap-4 lg:gap-6 scrollbar-hide after:content-[''] after:shrink-0 after:w-1 sm:after:w-0 touch-pan-x"
+                      style={{ WebkitOverflowScrolling: 'touch' }}
+                    >
                       {communityGroups.map((group) => (
                       <div 
                         key={group.id} 
-                        className="group bg-[#202c33] rounded-xl sm:rounded-3xl overflow-hidden flex flex-col border border-[#38464e]/30 hover:border-[#00a884]/50 transition-colors duration-200 snap-center sm:snap-start shrink-0 w-[40vw] sm:w-[220px] lg:w-[240px]"
+                        className="group bg-[#202c33] rounded-xl sm:rounded-3xl overflow-hidden flex flex-col border border-[#38464e]/30 hover:border-[#00a884]/50 transition-colors duration-200 shrink-0 w-[42vw] sm:w-[220px] lg:w-[240px]"
                       >
                       {/* Cover Image */}
                       <div className="relative aspect-square w-full">
