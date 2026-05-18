@@ -11,9 +11,10 @@
         "time": { "type": "string" },
         "joinLink": { "type": "string" },
         "isPublic": { "type": "boolean" },
+        "community": { "type": "string" },
         "createdAt": { "type": "number" }
       },
-      "required": ["title", "imageUrl", "joinLink", "isPublic"]
+      "required": ["title", "imageUrl", "joinLink", "isPublic", "community"]
     },
     "DailyStat": {
       "title": "Daily Stat",

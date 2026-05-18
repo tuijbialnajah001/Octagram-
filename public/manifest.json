@@ -1,5 +1,5 @@
 {
-  "name": "𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠",
+  "name": "𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠",
   "short_name": "OCTAGRAM",
   "start_url": "/",
   "display": "standalone",
@@ -8,13 +8,13 @@
   "description": "An alliance united under the banner of anime.",
   "icons": [
     {
-      "src": "https://files.catbox.moe/vzi8kx.png",
+      "src": "/favicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://files.catbox.moe/vzi8kx.png",
+      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

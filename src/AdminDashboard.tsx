@@ -12,8 +12,16 @@ interface Group {
   time: string;
   joinLink: string;
   isPublic: boolean;
+  community: string;
   createdAt: number;
 }
+
+const COMMUNITIES = [
+  '𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠',
+  'Kҽɳƈԋσ Aʅʅιαɳƈҽ',
+  'Nexus',
+  '𝙱𝙹𝙴 ~ Clan'
+];
 
 export function AdminDashboard({ onExit }: { onExit: () => void }) {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -53,6 +61,7 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
           time: editingGroup.time || '',
           joinLink: editingGroup.joinLink || '',
           isPublic: editingGroup.isPublic ?? false,
+          community: editingGroup.community || COMMUNITIES[0],
           createdAt: Date.now()
         });
       }
@@ -79,7 +88,7 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <div className="flex gap-4">
             <button
-              onClick={() => setEditingGroup({ isPublic: true })}
+              onClick={() => setEditingGroup({ isPublic: true, community: COMMUNITIES[0] })}
               className="flex items-center gap-2 px-4 py-2 bg-[#00a884] text-[#111b21] rounded-lg font-medium hover:bg-[#00a884]/90"
             >
               <Plus size={20} /> Add Group
@@ -135,6 +144,19 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
               />
             </div>
 
+            <div>
+              <label className="block text-sm text-[#8696a0] mb-1">Community</label>
+              <select
+                value={editingGroup.community || COMMUNITIES[0]}
+                onChange={e => setEditingGroup({...editingGroup, community: e.target.value})}
+                className="w-full bg-[#2a3942] border border-[#38464e] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#00a884] appearance-none"
+              >
+                {COMMUNITIES.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
             <label className="flex items-center gap-3 select-none">
               <input
                 type="checkbox"
@@ -157,7 +179,10 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
                   <img src={group.imageUrl} alt={group.title} className="w-16 h-16 object-cover rounded-lg" />
                   <div>
                     <h3 className="font-medium text-lg">{group.title}</h3>
-                    <div className="text-sm text-[#8696a0] flex gap-2 items-center">
+                    <div className="text-sm text-[#8696a0] flex gap-2 items-center flex-wrap">
+                      <span className={`px-2 py-0.5 rounded text-xs leading-tight bg-[#2a3942] border border-[#38464e] text-white`}>
+                        {group.community || 'Uncategorized'}
+                      </span>
                       <span className={`w-2 h-2 rounded-full ${group.isPublic ? 'bg-[#00a884]' : 'bg-red-500'}`} />
                       {group.isPublic ? 'Public' : 'Hidden'}
                     </div>

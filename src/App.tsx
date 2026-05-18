@@ -19,8 +19,16 @@ interface Group {
   time: string;
   joinLink: string;
   isPublic: boolean;
+  community?: string;
   createdAt: number;
 }
+
+const COMMUNITIES = [
+  '𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠',
+  'Kҽɳƈԋσ Aʅʅιαɳƈҽ',
+  'Nexus',
+  '𝙱𝙹𝙴 ~ Clan'
+];
 
 const ADMIN_EMAILS = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
 
@@ -173,7 +181,7 @@ export default function App() {
             </button>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-md">
-            𝗧𝗛Ξ 𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
+            𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
           </h1>
           <div className="flex-1 flex justify-end gap-2">
           {deferredPrompt && (
@@ -220,46 +228,63 @@ export default function App() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-2 sm:gap-4 lg:gap-6">
-            {groups.map((group) => (
-            <div 
-              key={group.id} 
-              className="group bg-[#202c33] rounded-xl sm:rounded-3xl overflow-hidden flex flex-col border border-[#38464e]/30 hover:border-[#00a884]/50 transition-colors duration-200"
-            >
-              {/* Cover Image */}
-              <div className="relative aspect-square w-full">
-                <div className="absolute inset-0 bg-gradient-to-t from-[#202c33] to-transparent z-10 opacity-50"></div>
-                <img 
-                  src={group.imageUrl} 
-                  alt={group.title}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
+          <div className="space-y-12 sm:space-y-16">
+            {COMMUNITIES.map(community => {
+              const communityGroups = groups.filter(g => g.community === community || (!g.community && community === COMMUNITIES[0]));
+              if (communityGroups.length === 0) return null;
+              
+              return (
+                <section key={community} className="space-y-4 sm:space-y-6">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg sm:text-2xl font-bold text-white tracking-wide">{community}</h2>
+                    <div className="flex-1 h-[1px] bg-gradient-to-r from-[#00a884]/40 to-transparent"></div>
+                  </div>
+                  <div className="relative -mx-4 sm:mx-0">
+                    <div className="flex overflow-x-auto pb-4 px-4 sm:px-0 gap-3 sm:gap-4 lg:gap-6 snap-x snap-mandatory scrollbar-hide scroll-smooth after:content-[''] after:shrink-0 after:w-1 sm:after:w-0">
+                      {communityGroups.map((group) => (
+                      <div 
+                        key={group.id} 
+                        className="group bg-[#202c33] rounded-xl sm:rounded-3xl overflow-hidden flex flex-col border border-[#38464e]/30 hover:border-[#00a884]/50 transition-colors duration-200 snap-center sm:snap-start shrink-0 w-[40vw] sm:w-[220px] lg:w-[240px]"
+                      >
+                      {/* Cover Image */}
+                      <div className="relative aspect-square w-full">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#202c33] to-transparent z-10 opacity-50"></div>
+                        <img 
+                          src={group.imageUrl} 
+                          alt={group.title}
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
 
-              {/* Card Content */}
-              <div className="flex flex-col flex-grow relative z-20 bg-[#202c33]">
-                <div className="p-2 sm:p-5 pb-1.5 sm:pb-3 text-center">
-                  <h3 className="text-[9px] sm:text-[14px] md:text-[16px] leading-tight font-semibold text-[#e9edef] tracking-wide mb-1 px-0.5 sm:px-2 break-words" title={group.title}>
-                    {group.title}
-                  </h3>
-                </div>
+                      {/* Card Content */}
+                      <div className="flex flex-col flex-grow relative z-20 bg-[#202c33]">
+                        <div className="p-2 sm:p-5 pb-1.5 sm:pb-3 text-center">
+                          <h3 className="text-[9px] sm:text-[14px] md:text-[16px] leading-tight font-semibold text-[#e9edef] tracking-wide mb-1 px-0.5 sm:px-2 break-words" title={group.title}>
+                            {group.title}
+                          </h3>
+                        </div>
 
-                {/* Action Button */}
-                <div className="mt-auto px-2 pb-2 sm:px-5 sm:pb-5 text-center">
-                  <a
-                    href={group.joinLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full py-1.5 sm:py-3 bg-[#00a884] text-[#111b21] font-bold text-[10px] sm:text-[15px] rounded-md sm:rounded-2xl hover:bg-[#00c59b] transition-colors active:opacity-80 truncate"
-                  >
-                    Join
-                  </a>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                        {/* Action Button */}
+                        <div className="mt-auto px-2 pb-2 sm:px-5 sm:pb-5 text-center">
+                          <a
+                            href={group.joinLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full py-1.5 sm:py-3 bg-[#00a884] text-[#111b21] font-bold text-[10px] sm:text-[15px] rounded-md sm:rounded-2xl hover:bg-[#00c59b] transition-colors active:opacity-80 truncate"
+                          >
+                            Join
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                    </div>
+                  </div>
+                </section>
+              );
+            })}
+          </div>
         )}
 
       </main>
