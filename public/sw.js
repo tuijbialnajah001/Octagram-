@@ -1,4 +1,4 @@
-const CACHE_NAME = 'octagram-image-cache-v1';
+const CACHE_NAME = 'octagram-image-cache-v2';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
@@ -19,6 +19,14 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  // Specifically exclude favicon from caching
+  if (e.request.url.includes('favicon.png')) {
+    e.respondWith(
+      fetch(e.request)
+    );
+    return;
+  }
+
   // Check if the request is for an image
   if (e.request.destination === 'image' || e.request.url.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i)) {
     e.respondWith(
