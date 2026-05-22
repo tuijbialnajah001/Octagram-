@@ -1,4 +1,4 @@
-const CACHE_NAME = 'octagram-image-cache-v4';
+const CACHE_NAME = 'octagram-image-cache-v5';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
