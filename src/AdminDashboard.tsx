@@ -35,7 +35,36 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [linkRequests, setLinkRequests] = useState<LinkRequest[]>([]);
   const [editingGroup, setEditingGroup] = useState<Partial<Group> | null>(null);
+  const [isFetchingUrl, setIsFetchingUrl] = useState(false);
   
+  const handleFetchGroupInfo = async () => {
+    if (!editingGroup?.joinLink) return;
+    setIsFetchingUrl(true);
+    try {
+      const res = await fetch('/api/fetch-group-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: editingGroup.joinLink }),
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setEditingGroup(prev => ({
+          ...prev!,
+          title: data.title || prev?.title || '',
+          imageUrl: data.image || prev?.imageUrl || ''
+        }));
+      } else {
+        alert(data.error || "Could not fetch info. Make sure it's a valid WhatsApp link.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error fetching info.");
+    } finally {
+      setIsFetchingUrl(false);
+    }
+  };
+
   useEffect(() => {
     const unsubscribeGroups = onSnapshot(
       collection(db, 'groups'),
@@ -211,12 +240,22 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
 
             <div>
               <label className="block text-sm text-[#8696a0] mb-1">Join Link</label>
-              <input
-                required
-                value={editingGroup.joinLink || ''}
-                onChange={e => setEditingGroup({...editingGroup, joinLink: e.target.value})}
-                className="w-full bg-[#2a3942] border border-[#38464e] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#00a884]"
-              />
+              <div className="flex gap-2">
+                <input
+                  required
+                  value={editingGroup.joinLink || ''}
+                  onChange={e => setEditingGroup({...editingGroup, joinLink: e.target.value})}
+                  className="flex-1 bg-[#2a3942] border border-[#38464e] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#00a884]"
+                />
+                <button
+                  type="button"
+                  onClick={handleFetchGroupInfo}
+                  disabled={isFetchingUrl || !editingGroup.joinLink}
+                  className="px-4 py-2 bg-[#2a3942] hover:bg-[#38464e] disabled:opacity-50 border border-[#38464e] rounded-lg text-sm text-[#00a884] font-medium transition-colors"
+                >
+                  {isFetchingUrl ? 'Fetching...' : 'Auto-Fill'}
+                </button>
+              </div>
             </div>
 
             <div>
