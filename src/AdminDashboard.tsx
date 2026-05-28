@@ -14,6 +14,7 @@ interface Group {
   isPublic: boolean;
   community: string;
   createdAt: number;
+  isMostActive?: boolean;
 }
 
 const COMMUNITIES = [
@@ -127,7 +128,8 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
           joinLink: groupToSave.joinLink || '',
           isPublic: groupToSave.isPublic ?? false,
           community: groupToSave.community || COMMUNITIES[0],
-          createdAt: Date.now()
+          createdAt: Date.now(),
+          isMostActive: groupToSave.isMostActive ?? false
         });
       }
       setEditingGroup(null);
@@ -337,6 +339,16 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
               <span>Is Public</span>
             </label>
 
+            <label className="flex items-center gap-3 select-none">
+              <input
+                type="checkbox"
+                checked={!!editingGroup.isMostActive}
+                onChange={e => setEditingGroup({...editingGroup, isMostActive: e.target.checked})}
+                className="w-5 h-5 accent-[#00a884]"
+              />
+              <span>Most Active Group</span>
+            </label>
+
             <button type="submit" className="w-full py-3 bg-[#00a884] text-[#111b21] rounded-lg font-medium hover:bg-[#00a884]/90">
               Save Group
             </button>
@@ -353,6 +365,11 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
                       <span className={`px-2 py-0.5 rounded text-xs leading-tight bg-[#2a3942] border border-[#38464e] text-white`}>
                         {group.community || 'Uncategorized'}
                       </span>
+                      {group.isMostActive && (
+                        <span className={`px-2 py-0.5 rounded text-xs leading-tight bg-orange-500/20 text-orange-400 border border-orange-500/30`}>
+                          Most Active
+                        </span>
+                      )}
                       <span className={`w-2 h-2 rounded-full ${group.isPublic ? 'bg-[#00a884]' : 'bg-red-500'}`} />
                       {group.isPublic ? 'Public' : 'Hidden'}
                     </div>

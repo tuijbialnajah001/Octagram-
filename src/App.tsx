@@ -21,6 +21,7 @@ interface Group {
   isPublic: boolean;
   community?: string;
   createdAt: number;
+  isMostActive?: boolean;
 }
 
 const COMMUNITIES = [
@@ -31,6 +32,53 @@ const COMMUNITIES = [
 ];
 
 const ADMIN_EMAILS = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
+
+function GroupCard({ group, requested, onRequest }: { group: Group, requested: boolean, onRequest: () => void }) {
+  return (
+    <div 
+      className="group bg-[#202c33] rounded-xl sm:rounded-3xl overflow-hidden flex flex-col border border-[#38464e]/30 hover:border-[#00a884]/50 transition-colors duration-200 shrink-0 w-[24vw] sm:w-[140px] lg:w-[150px]"
+    >
+      {/* Cover Image */}
+      <div className="relative aspect-square w-full">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#202c33] to-transparent z-10 opacity-50"></div>
+        <img 
+          src={group.imageUrl} 
+          alt={group.title}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
+
+      {/* Card Content */}
+      <div className="flex flex-col flex-grow relative z-20 bg-[#202c33]">
+        <div className="p-1.5 sm:p-3 pb-1 sm:pb-2 text-center">
+          <h3 className="text-[8px] sm:text-[11px] md:text-[12px] leading-tight font-semibold text-[#e9edef] tracking-wide mb-1 px-0.5 sm:px-1 break-words" title={group.title}>
+            {group.title}
+          </h3>
+        </div>
+
+        {/* Action Button */}
+        <div className="mt-auto px-1.5 pb-1.5 sm:px-3 sm:pb-3 text-center flex flex-col gap-1 sm:gap-1.5">
+          <a
+            href={group.joinLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full py-1 sm:py-1.5 bg-[#00a884] text-[#111b21] font-bold text-[8px] sm:text-[11px] rounded-sm sm:rounded-md hover:bg-[#00c59b] transition-colors active:opacity-80 truncate"
+          >
+            Join
+          </a>
+          <button
+            onClick={onRequest}
+            disabled={requested}
+            className="block w-full py-1 sm:py-1.5 bg-transparent text-red-500 font-semibold text-[7px] sm:text-[9px] rounded-sm sm:rounded-md border border-red-500/50 hover:bg-red-500/10 transition-colors active:opacity-80 truncate disabled:opacity-50 disabled:border-gray-500 disabled:text-gray-400 disabled:hover:bg-transparent"
+          >
+            {requested ? 'Requested' : 'Request new link'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -269,6 +317,48 @@ export default function App() {
           </div>
         ) : (
           <div className="space-y-12 sm:space-y-16">
+            {(() => {
+              const mostActive = groups.filter(g => g.isMostActive);
+              if (mostActive.length === 0) return null;
+              
+              return (
+                <section key="most-active" className="space-y-4 sm:space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-orange-500/20 px-3 py-1 flex items-center gap-2 rounded-full border border-orange-500/30">
+                      <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+                      <h2 className="text-sm sm:text-base font-bold text-orange-400 tracking-wide uppercase">Most Active</h2>
+                    </div>
+                    <div className="flex-1 h-[1px] bg-gradient-to-r from-orange-500/40 to-transparent"></div>
+                  </div>
+                  
+                  <div className="relative -mx-4 sm:mx-0 pr-4 sm:pr-0 overflow-hidden">
+                    <div 
+                      className="flex gap-3 sm:gap-4 w-max animate-slide-left px-4 sm:px-0"
+                    >
+                      {/* Original set */}
+                      {mostActive.map((group) => (
+                        <GroupCard
+                          key={`active-orig-${group.id}`}
+                          group={group}
+                          requested={requestedLinks.has(group.id)}
+                          onRequest={() => handleRequestLink(group)}
+                        />
+                      ))}
+                      {/* Duplicated set for seamless loop */}
+                      {mostActive.map((group) => (
+                        <GroupCard
+                          key={`active-dup-${group.id}`}
+                          group={group}
+                          requested={requestedLinks.has(group.id)}
+                          onRequest={() => handleRequestLink(group)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              );
+            })()}
+
             {COMMUNITIES.map(community => {
               const communityGroups = groups.filter(g => g.community === community || (!g.community && community === COMMUNITIES[0]));
               if (communityGroups.length === 0) return null;
@@ -285,50 +375,13 @@ export default function App() {
                       style={{ WebkitOverflowScrolling: 'touch' }}
                     >
                       {communityGroups.map((group) => (
-                      <div 
-                        key={group.id} 
-                        className="group bg-[#202c33] rounded-xl sm:rounded-3xl overflow-hidden flex flex-col border border-[#38464e]/30 hover:border-[#00a884]/50 transition-colors duration-200 shrink-0 w-[24vw] sm:w-[140px] lg:w-[150px]"
-                      >
-                      {/* Cover Image */}
-                      <div className="relative aspect-square w-full">
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#202c33] to-transparent z-10 opacity-50"></div>
-                        <img 
-                          src={group.imageUrl} 
-                          alt={group.title}
-                          loading="lazy"
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        <GroupCard
+                          key={group.id}
+                          group={group}
+                          requested={requestedLinks.has(group.id)}
+                          onRequest={() => handleRequestLink(group)}
                         />
-                      </div>
-
-                      {/* Card Content */}
-                      <div className="flex flex-col flex-grow relative z-20 bg-[#202c33]">
-                        <div className="p-1.5 sm:p-3 pb-1 sm:pb-2 text-center">
-                          <h3 className="text-[8px] sm:text-[11px] md:text-[12px] leading-tight font-semibold text-[#e9edef] tracking-wide mb-1 px-0.5 sm:px-1 break-words" title={group.title}>
-                            {group.title}
-                          </h3>
-                        </div>
-
-                        {/* Action Button */}
-                        <div className="mt-auto px-1.5 pb-1.5 sm:px-3 sm:pb-3 text-center flex flex-col gap-1 sm:gap-1.5">
-                          <a
-                            href={group.joinLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block w-full py-1 sm:py-1.5 bg-[#00a884] text-[#111b21] font-bold text-[8px] sm:text-[11px] rounded-sm sm:rounded-md hover:bg-[#00c59b] transition-colors active:opacity-80 truncate"
-                          >
-                            Join
-                          </a>
-                          <button
-                            onClick={() => handleRequestLink(group)}
-                            disabled={requestedLinks.has(group.id)}
-                            className="block w-full py-1 sm:py-1.5 bg-transparent text-red-500 font-semibold text-[7px] sm:text-[9px] rounded-sm sm:rounded-md border border-red-500/50 hover:bg-red-500/10 transition-colors active:opacity-80 truncate disabled:opacity-50 disabled:border-gray-500 disabled:text-gray-400 disabled:hover:bg-transparent"
-                          >
-                            {requestedLinks.has(group.id) ? 'Requested' : 'Request new link'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      ))}
                     </div>
                   </div>
                 </section>
