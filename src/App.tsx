@@ -33,47 +33,10 @@ const COMMUNITIES = [
 
 const ADMIN_EMAILS = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
 
-function AutoScrollWrapper({ children }: { children: React.ReactNode }) {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    
-    let scrollAmount = 0.5;
-    let animationFrameId: number;
-    
-    const scroll = () => {
-      if (container.scrollWidth <= container.clientWidth) {
-         // No need to scroll
-         return;
-      }
-      
-      container.scrollLeft += scrollAmount;
-      if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
-         scrollAmount = -0.5; // reverse
-      } else if (container.scrollLeft <= 0) {
-         scrollAmount = 0.5; // forward
-      }
-      
-      animationFrameId = requestAnimationFrame(scroll);
-    };
-    
-    animationFrameId = requestAnimationFrame(scroll);
-    
-    return () => cancelAnimationFrame(animationFrameId);
-  }, []);
-
-  return (
-    <div 
-      ref={containerRef}
-      className="flex overflow-x-auto pb-4 gap-3 sm:gap-4 scrollbar-hide px-4 sm:px-0 after:content-[''] after:shrink-0 after:w-1 sm:after:w-0"
-      style={{ WebkitOverflowScrolling: 'touch' }}
-    >
-      {children}
-    </div>
-  );
-}
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { EffectCoverflow } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-coverflow';
 
 function GroupCard({ group, requested, onRequest }: { group: Group, requested: boolean, onRequest: () => void }) {
   return (
@@ -373,17 +336,32 @@ export default function App() {
                     <div className="flex-1 h-[1px] bg-gradient-to-r from-orange-500/40 to-transparent"></div>
                   </div>
                   
-                  <div className="relative -mx-4 sm:mx-0 pr-4 sm:pr-0 overflow-hidden">
-                    <AutoScrollWrapper>
+                  <div className="relative -mx-4 sm:mx-0 overflow-hidden">
+                    <Swiper
+                      effect={'coverflow'}
+                      grabCursor={true}
+                      centeredSlides={true}
+                      slidesPerView={'auto'}
+                      coverflowEffect={{
+                        rotate: 30,
+                        stretch: 0,
+                        depth: 100,
+                        modifier: 1,
+                        slideShadows: true,
+                      }}
+                      modules={[EffectCoverflow]}
+                      className="w-full py-6 px-4"
+                    >
                       {mostActive.map((group) => (
-                        <GroupCard
-                          key={`active-${group.id}`}
-                          group={group}
-                          requested={requestedLinks.has(group.id)}
-                          onRequest={() => handleRequestLink(group)}
-                        />
+                        <SwiperSlide key={`active-${group.id}`} className="!w-auto md:!w-auto">
+                          <GroupCard
+                            group={group}
+                            requested={requestedLinks.has(group.id)}
+                            onRequest={() => handleRequestLink(group)}
+                          />
+                        </SwiperSlide>
                       ))}
-                    </AutoScrollWrapper>
+                    </Swiper>
                   </div>
                 </section>
               );
