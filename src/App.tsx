@@ -33,6 +33,48 @@ const COMMUNITIES = [
 
 const ADMIN_EMAILS = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
 
+function AutoScrollWrapper({ children }: { children: React.ReactNode }) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    let scrollAmount = 0.5;
+    let animationFrameId: number;
+    
+    const scroll = () => {
+      if (container.scrollWidth <= container.clientWidth) {
+         // No need to scroll
+         return;
+      }
+      
+      container.scrollLeft += scrollAmount;
+      if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
+         scrollAmount = -0.5; // reverse
+      } else if (container.scrollLeft <= 0) {
+         scrollAmount = 0.5; // forward
+      }
+      
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+    
+    animationFrameId = requestAnimationFrame(scroll);
+    
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="flex overflow-x-auto pb-4 gap-3 sm:gap-4 scrollbar-hide px-4 sm:px-0 after:content-[''] after:shrink-0 after:w-1 sm:after:w-0"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function GroupCard({ group, requested, onRequest }: { group: Group, requested: boolean, onRequest: () => void }) {
   return (
     <div 
@@ -332,28 +374,16 @@ export default function App() {
                   </div>
                   
                   <div className="relative -mx-4 sm:mx-0 pr-4 sm:pr-0 overflow-hidden">
-                    <div 
-                      className="flex gap-3 sm:gap-4 w-max animate-slide-left px-4 sm:px-0"
-                    >
-                      {/* Original set */}
+                    <AutoScrollWrapper>
                       {mostActive.map((group) => (
                         <GroupCard
-                          key={`active-orig-${group.id}`}
+                          key={`active-${group.id}`}
                           group={group}
                           requested={requestedLinks.has(group.id)}
                           onRequest={() => handleRequestLink(group)}
                         />
                       ))}
-                      {/* Duplicated set for seamless loop */}
-                      {mostActive.map((group) => (
-                        <GroupCard
-                          key={`active-dup-${group.id}`}
-                          group={group}
-                          requested={requestedLinks.has(group.id)}
-                          onRequest={() => handleRequestLink(group)}
-                        />
-                      ))}
-                    </div>
+                    </AutoScrollWrapper>
                   </div>
                 </section>
               );
