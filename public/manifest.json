@@ -8,13 +8,13 @@
   "description": "An alliance united under the banner of anime.",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "https://i.postimg.cc/N02y1D0z/797f5eb692953cd6e73f8a257d1ad83afbe3bda7d4306d1f73a157d6e7859f59-2.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/favicon.png",
+      "src": "https://i.postimg.cc/N02y1D0z/797f5eb692953cd6e73f8a257d1ad83afbe3bda7d4306d1f73a157d6e7859f59-2.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

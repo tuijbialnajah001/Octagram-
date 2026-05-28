@@ -271,9 +271,16 @@ export default function App() {
               <span className="hidden sm:inline">Stats</span>
             </a>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
-            𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
-          </h1>
+          <div className="flex items-center gap-3">
+            <img 
+              src="https://i.postimg.cc/N02y1D0z/797f5eb692953cd6e73f8a257d1ad83afbe3bda7d4306d1f73a157d6e7859f59-2.png" 
+              alt="Octagram Logo" 
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg"
+            />
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
+              𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
+            </h1>
+          </div>
           <div className="flex-1 flex justify-end gap-2">
           {deferredPrompt && (
             <button
