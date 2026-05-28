@@ -117,7 +117,8 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
         }
       } else {
         // Create new
-        const id = groupToSave.title?.toLowerCase().replace(/\s+/g, '-') || Date.now().toString();
+        const baseSlug = groupToSave.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'group';
+        const id = `${baseSlug}-${Date.now()}`;
         await setDoc(doc(db, 'groups', id), {
           title: groupToSave.title || '',
           description: groupToSave.description || '',
