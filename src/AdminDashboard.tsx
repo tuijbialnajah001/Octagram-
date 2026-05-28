@@ -36,6 +36,7 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
   const [linkRequests, setLinkRequests] = useState<LinkRequest[]>([]);
   const [editingGroup, setEditingGroup] = useState<Partial<Group> | null>(null);
   const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+  const [duplicateGroup, setDuplicateGroup] = useState<Group | null>(null);
   
   const handleFetchGroupInfo = async () => {
     if (!editingGroup?.joinLink) return;
@@ -46,7 +47,13 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: editingGroup.joinLink }),
       });
-      const data = await res.json();
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error(`Server returned an invalid response (${res.status}).`);
+      }
       
       if (res.ok) {
         setEditingGroup(prev => ({
@@ -57,9 +64,9 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
       } else {
         alert(data.error || "Could not fetch info. Make sure it's a valid WhatsApp link.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Network error fetching info.");
+      alert(`Network error fetching info: ${err.message || 'Unknown error'}`);
     } finally {
       setIsFetchingUrl(false);
     }
@@ -98,36 +105,45 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
     };
   }, []);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingGroup) return;
-
+  const performSave = async (groupToSave: Partial<Group>) => {
     try {
-      if (editingGroup.id) {
+      if (groupToSave.id) {
         // Update existing
-        await updateDoc(doc(db, 'groups', editingGroup.id), editingGroup);
+        await updateDoc(doc(db, 'groups', groupToSave.id), groupToSave);
         // Automatically dismiss any requests for this group
-        const requestsToDismiss = linkRequests.filter(r => r.groupId === editingGroup.id);
+        const requestsToDismiss = linkRequests.filter(r => r.groupId === groupToSave.id);
         for (const req of requestsToDismiss) {
           await deleteDoc(doc(db, 'link_requests', req.id));
         }
       } else {
         // Create new
-        const id = editingGroup.title?.toLowerCase().replace(/\s+/g, '-') || Date.now().toString();
+        const id = groupToSave.title?.toLowerCase().replace(/\s+/g, '-') || Date.now().toString();
         await setDoc(doc(db, 'groups', id), {
-          title: editingGroup.title || '',
-          description: editingGroup.description || '',
-          imageUrl: editingGroup.imageUrl || '',
-          time: editingGroup.time || '',
-          joinLink: editingGroup.joinLink || '',
-          isPublic: editingGroup.isPublic ?? false,
-          community: editingGroup.community || COMMUNITIES[0],
+          title: groupToSave.title || '',
+          description: groupToSave.description || '',
+          imageUrl: groupToSave.imageUrl || '',
+          time: groupToSave.time || '',
+          joinLink: groupToSave.joinLink || '',
+          isPublic: groupToSave.isPublic ?? false,
+          community: groupToSave.community || COMMUNITIES[0],
           createdAt: Date.now()
         });
       }
       setEditingGroup(null);
     } catch (err) {
-      handleFirestoreError(err, editingGroup.id ? OperationType.UPDATE : OperationType.CREATE, 'groups');
+      handleFirestoreError(err, groupToSave.id ? OperationType.UPDATE : OperationType.CREATE, 'groups');
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGroup) return;
+
+    const existingGroup = groups.find(g => g.joinLink === editingGroup.joinLink && g.id !== editingGroup.id);
+    if (existingGroup) {
+      setDuplicateGroup(existingGroup);
+    } else {
+      await performSave(editingGroup);
     }
   };
 
@@ -205,6 +221,45 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {duplicateGroup && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+            <div className="bg-[#202c33] p-6 rounded-xl max-w-sm w-full border border-[#38464e]">
+              <h3 className="text-xl font-bold mb-2">Group Already Exists</h3>
+              <p className="text-[#8696a0] mb-6">
+                A group with this link already exists: <span className="font-semibold text-white">"{duplicateGroup.title}"</span>. 
+                What would you like to do?
+              </p>
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => { 
+                    const groupToSave = editingGroup!;
+                    setDuplicateGroup(null); 
+                    performSave(groupToSave); 
+                  }} 
+                  className="w-full py-2 bg-[#00a884] text-[#111b21] rounded-lg font-medium hover:bg-[#00a884]/90"
+                >
+                  Add Anyway
+                </button>
+                <button 
+                  onClick={() => { 
+                    setDuplicateGroup(null); 
+                    setEditingGroup({ isPublic: true, community: COMMUNITIES[0] }); 
+                  }} 
+                  className="w-full py-2 bg-[#2a3942] text-white rounded-lg font-medium hover:bg-[#38464e]"
+                >
+                  Add Another
+                </button>
+                <button 
+                  onClick={() => setDuplicateGroup(null)} 
+                  className="w-full py-2 bg-transparent text-[#8696a0] font-medium hover:text-white"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}
