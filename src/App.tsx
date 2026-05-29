@@ -75,7 +75,7 @@ function GroupCard({ group, requested, onRequest }: { group: Group, requested: b
           <button
             onClick={onRequest}
             disabled={requested}
-            className="block w-full py-1 sm:py-1.5 bg-transparent text-red-500 font-semibold text-[7px] sm:text-[9px] rounded-sm sm:rounded-md border border-red-500/50 hover:bg-red-500/10 transition-colors active:opacity-80 truncate disabled:opacity-50 disabled:border-gray-500 disabled:text-gray-400 disabled:hover:bg-transparent"
+            className="swiper-no-swiping block w-full py-1 sm:py-1.5 bg-transparent text-red-500 font-semibold text-[7px] sm:text-[9px] rounded-sm sm:rounded-md border border-red-500/50 hover:bg-red-500/10 transition-colors active:opacity-80 truncate disabled:opacity-50 disabled:border-gray-500 disabled:text-gray-400 disabled:hover:bg-transparent relative z-50 cursor-pointer"
           >
             {requested ? 'Requested' : 'Request new link'}
           </button>
@@ -349,6 +349,9 @@ export default function App() {
                       grabCursor={true}
                       centeredSlides={true}
                       slidesPerView={'auto'}
+                      slideToClickedSlide={true}
+                      preventClicks={false}
+                      preventClicksPropagation={false}
                       coverflowEffect={{
                         rotate: 30,
                         stretch: 0,
