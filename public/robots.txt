@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://octagram-beta.web.app/sitemap.xml
