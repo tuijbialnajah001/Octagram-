@@ -9,7 +9,7 @@ import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { AdminDashboard } from './AdminDashboard';
 import { StatsView } from './StatsView';
-import { Lock, LayoutDashboard, BarChart3, Download } from 'lucide-react';
+import { LayoutDashboard, BarChart3, Download, Search, Lock } from 'lucide-react';
 
 interface Group {
   id: string;
@@ -96,6 +96,7 @@ export default function App() {
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [requestedLinks, setRequestedLinks] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [authLoaded, setAuthLoaded] = useState(false);
 
@@ -324,19 +325,46 @@ export default function App() {
           <div className="flex justify-center items-center py-32">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00a884]"></div>
           </div>
-        ) : groups.length === 0 ? (
-          <div className="text-center py-20 bg-[#202c33] rounded-2xl sm:rounded-3xl border border-[#38464e]/50 max-w-2xl mx-auto">
-            <h3 className="text-xl text-[#e9edef] font-medium mb-3">No groups available</h3>
-            <p className="text-[#8696a0] max-w-md mx-auto leading-relaxed">
-              Please add groups via your Firebase Console in the "groups" collection.
-              Remember to set <code className="bg-[#111b21] px-1.5 py-0.5 rounded text-sm text-[#00a884]">isPublic: true</code> for them to appear here.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-12 sm:space-y-16">
-            {(() => {
-              const mostActive = groups.filter(g => g.isMostActive);
-              if (mostActive.length === 0) return null;
+        ) : (() => {
+          const filteredGroups = groups.filter(g =>
+            g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (g.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+          );
+
+          if (groups.length === 0) {
+            return (
+              <div className="text-center py-20 bg-[#202c33] rounded-2xl sm:rounded-3xl border border-[#38464e]/50 max-w-2xl mx-auto">
+                <h3 className="text-xl text-[#e9edef] font-medium mb-3">No groups available</h3>
+                <p className="text-[#8696a0] max-w-md mx-auto leading-relaxed">
+                  Please add groups via your Firebase Console in the "groups" collection.
+                  Remember to set <code className="bg-[#111b21] px-1.5 py-0.5 rounded text-sm text-[#00a884]">isPublic: true</code> for them to appear here.
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="space-y-8 sm:space-y-12">
+              <div className="relative max-w-xl mx-auto mb-8 sm:mb-12">
+                <input
+                  type="text"
+                  placeholder="Search groups and projects..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-[#202c33] text-white px-5 py-3.5 sm:py-4 rounded-2xl border border-[#38464e] focus:border-[#00a884] focus:outline-none focus:ring-1 focus:ring-[#00a884] placeholder-[#8696a0] transition-colors shadow-lg"
+                />
+                <Search className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 text-[#8696a0]" size={20} />
+              </div>
+
+              {filteredGroups.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="text-[#8696a0] text-lg">No groups or projects found for "{searchQuery}"</p>
+                </div>
+              ) : (
+                <div className="space-y-12 sm:space-y-16">
+                  {(() => {
+                    const mostActive = filteredGroups.filter(g => g.isMostActive);
+                    if (mostActive.length === 0) return null;
               
               return (
                 <section key="most-active" className="space-y-4 sm:space-y-6">
@@ -383,7 +411,7 @@ export default function App() {
             })()}
 
             {COMMUNITIES.map(community => {
-              const communityGroups = groups.filter(g => g.community === community || (!g.community && community === COMMUNITIES[0]));
+              const communityGroups = filteredGroups.filter(g => g.community === community || (!g.community && community === COMMUNITIES[0]));
               if (communityGroups.length === 0) return null;
               
               return (
@@ -411,7 +439,10 @@ export default function App() {
               );
             })}
           </div>
-        )}
+              )}
+            </div>
+          );
+        })()}
 
       </main>
 
