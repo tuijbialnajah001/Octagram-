@@ -89,14 +89,18 @@ export default function App() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbConnected, setDbConnected] = useState(true);
-  const queryParams = new URLSearchParams(window.location.search);
-  const [isAdminView, setIsAdminView] = useState(queryParams.get('view') === 'admin');
-  const [isStatsView, setIsStatsView] = useState(queryParams.get('view') === 'stats');
+  const [currentView, setCurrentView] = useState(new URLSearchParams(window.location.search).get('view') || 'home');
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [requestedLinks, setRequestedLinks] = useState<Set<string>>(new Set());
 
   const [authLoaded, setAuthLoaded] = useState(false);
+
+  const navigateTo = (view: string) => {
+    const url = view === 'home' ? '/' : `?view=${view}`;
+    window.history.pushState({}, '', url);
+    setCurrentView(view);
+  };
 
   const handleRequestLink = async (group: Group) => {
     if (requestedLinks.has(group.id)) return;
@@ -127,6 +131,15 @@ export default function App() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      setCurrentView(params.get('view') || 'home');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
@@ -203,7 +216,7 @@ export default function App() {
   const handleAdminClick = async () => {
     if (auth.currentUser) {
       if (auth.currentUser.email && ADMIN_EMAILS.includes(auth.currentUser.email)) {
-        window.open('?view=admin', '_blank');
+        navigateTo('admin');
       } else {
         alert("You are not authorized as an admin.");
       }
@@ -212,7 +225,7 @@ export default function App() {
         const provider = new GoogleAuthProvider();
         const res = await signInWithPopup(auth, provider);
         if (res.user.email && ADMIN_EMAILS.includes(res.user.email)) {
-          window.open('?view=admin', '_blank');
+          navigateTo('admin');
         } else {
           alert("You are not authorized as an admin.");
           await auth.signOut();
@@ -232,7 +245,7 @@ export default function App() {
     }
   };
 
-  if (isAdminView) {
+  if (currentView === 'admin') {
     if (!authLoaded) {
       return (
         <div className="min-h-[100dvh] bg-[#111b21] flex justify-center items-center">
@@ -244,15 +257,15 @@ export default function App() {
       return (
         <div className="min-h-[100dvh] bg-[#111b21] flex items-center justify-center flex-col gap-4 text-white">
           <p className="text-xl">Admin access required.</p>
-          <a href="/" className="px-6 py-2 bg-[#00a884] text-[#111b21] rounded-lg font-bold">Go Home</a>
+          <button onClick={() => navigateTo('home')} className="px-6 py-2 bg-[#00a884] text-[#111b21] rounded-lg font-bold">Go Home</button>
         </div>
       );
     }
-    return <AdminDashboard onExit={() => window.location.href = '/'} />;
+    return <AdminDashboard onExit={() => navigateTo('home')} />;
   }
   
-  if (isStatsView) {
-    return <StatsView onBack={() => window.location.href = '/'} />;
+  if (currentView === 'stats') {
+    return <StatsView onBack={() => navigateTo('home')} />;
   }
 
   return (
@@ -261,26 +274,17 @@ export default function App() {
       <header className="sticky top-0 z-50 w-full bg-[#111b21] border-b border-[#202c33] shadow-sm pt-[env(safe-area-inset-top)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex-1 flex justify-start">
-            <a
-              href="?view=stats"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => navigateTo('stats')}
               className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#202c33] text-[#e9edef] rounded-full text-sm font-medium hover:bg-[#38464e] transition-colors border border-[#38464e]/50 cursor-pointer"
             >
               <BarChart3 size={16} />
               <span className="hidden sm:inline">Stats</span>
-            </a>
+            </button>
           </div>
-          <div className="flex items-center gap-3">
-            <img 
-              src="https://i.postimg.cc/N02y1D0z/797f5eb692953cd6e73f8a257d1ad83afbe3bda7d4306d1f73a157d6e7859f59-2.png" 
-              alt="Octagram Logo" 
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg"
-            />
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
-              𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
-            </h1>
-          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
+            𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
+          </h1>
           <div className="flex-1 flex justify-end gap-2">
           {deferredPrompt && (
             <button
@@ -292,15 +296,13 @@ export default function App() {
             </button>
           )}
           {isAdminUser && (
-            <a
-              href="?view=admin"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => navigateTo('admin')}
               className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#00a884]/10 text-[#00a884] rounded-full text-sm font-medium hover:bg-[#00a884]/20 transition-colors border border-[#00a884]/20 cursor-pointer"
             >
               <LayoutDashboard size={16} />
               <span className="hidden sm:inline">Admin</span>
-            </a>
+            </button>
           )}
           </div>
         </div>
