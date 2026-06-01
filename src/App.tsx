@@ -34,6 +34,23 @@ const COMMUNITIES = [
 
 const ADMIN_EMAILS = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
 
+const normalizeText = (text: string) => {
+  if (!text) return '';
+  return text
+    .normalize('NFKD')
+    .replace(/[Λ]/g, 'A')
+    .replace(/[λ]/gi, 'a')
+    .replace(/[ҽ]/g, 'e')
+    .replace(/[ɳ]/g, 'n')
+    .replace(/[ƈ]/g, 'c')
+    .replace(/[ԋ]/g, 'h')
+    .replace(/[σ]/g, 'o')
+    .replace(/[ʅ]/g, 'l')
+    .replace(/[ι]/g, 'i')
+    .replace(/[α]/g, 'a')
+    .toLowerCase();
+};
+
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow } from 'swiper/modules';
 import 'swiper/css';
@@ -326,9 +343,11 @@ export default function App() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00a884]"></div>
           </div>
         ) : (() => {
+          const normalizedSearch = normalizeText(searchQuery);
           const filteredGroups = groups.filter(g =>
-            g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (g.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+            normalizeText(g.title).includes(normalizedSearch) ||
+            normalizeText(g.description).includes(normalizedSearch) ||
+            (g.community && normalizeText(g.community).includes(normalizedSearch))
           );
 
           if (groups.length === 0) {
