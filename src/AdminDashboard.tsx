@@ -21,7 +21,8 @@ const COMMUNITIES = [
   '𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠',
   'Kҽɳƈԋσ Aʅʅιαɳƈҽ',
   'Nexus',
-  '𝙱𝙹𝙴 ~ Clan'
+  '𝙱𝙹𝙴 ~ Clan',
+  'Projects'
 ];
 
 interface LinkRequest {
@@ -297,7 +298,7 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
             </div>
 
             <div>
-              <label className="block text-sm text-[#8696a0] mb-1">Join Link</label>
+              <label className="block text-sm text-[#8696a0] mb-1">Link URL</label>
               <div className="flex gap-2">
                 <input
                   required

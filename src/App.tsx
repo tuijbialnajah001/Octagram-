@@ -28,7 +28,8 @@ const COMMUNITIES = [
   '𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠',
   'Kҽɳƈԋσ Aʅʅιαɳƈҽ',
   'Nexus',
-  '𝙱𝙹𝙴 ~ Clan'
+  '𝙱𝙹𝙴 ~ Clan',
+  'Projects'
 ];
 
 const ADMIN_EMAILS = ['tuijbialnajah@gmail.com', 'nadiaparveen1526@gmail.com'];
@@ -70,15 +71,17 @@ function GroupCard({ group, requested, onRequest }: { group: Group, requested: b
             rel="noopener noreferrer"
             className="block w-full py-1 sm:py-1.5 bg-[#00a884] text-[#111b21] font-bold text-[8px] sm:text-[11px] rounded-sm sm:rounded-md hover:bg-[#00c59b] transition-colors active:opacity-80 truncate"
           >
-            Join
+            {group.community === 'Projects' ? 'Visit Project' : 'Join'}
           </a>
-          <button
-            onClick={onRequest}
-            disabled={requested}
-            className="swiper-no-swiping block w-full py-1 sm:py-1.5 bg-transparent text-red-500 font-semibold text-[7px] sm:text-[9px] rounded-sm sm:rounded-md border border-red-500/50 hover:bg-red-500/10 transition-colors active:opacity-80 truncate disabled:opacity-50 disabled:border-gray-500 disabled:text-gray-400 disabled:hover:bg-transparent relative z-50 cursor-pointer"
-          >
-            {requested ? 'Requested' : 'Request new link'}
-          </button>
+          {group.community !== 'Projects' && (
+            <button
+              onClick={onRequest}
+              disabled={requested}
+              className="swiper-no-swiping block w-full py-1 sm:py-1.5 bg-transparent text-red-500 font-semibold text-[7px] sm:text-[9px] rounded-sm sm:rounded-md border border-red-500/50 hover:bg-red-500/10 transition-colors active:opacity-80 truncate disabled:opacity-50 disabled:border-gray-500 disabled:text-gray-400 disabled:hover:bg-transparent relative z-50 cursor-pointer"
+            >
+              {requested ? 'Requested' : 'Request new link'}
+            </button>
+          )}
         </div>
       </div>
     </div>
