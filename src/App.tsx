@@ -101,7 +101,7 @@ function GroupCard({ group, requested, onRequest }: { group: Group, requested: b
         {/* Action Button */}
         <div className="mt-auto px-1.5 pb-1.5 sm:px-3 sm:pb-3 text-center flex flex-col gap-1 sm:gap-1.5">
           <a
-            href={group.joinLink}
+            href={group.joinLink?.startsWith('http') ? group.joinLink : `https://${group.joinLink}`}
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full py-1 sm:py-1.5 bg-[#00a884] text-[#111b21] font-bold text-[8px] sm:text-[11px] rounded-sm sm:rounded-md hover:bg-[#00c59b] transition-colors active:opacity-80 truncate"
