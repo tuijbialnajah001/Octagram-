@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { collection, onSnapshot, query, where, getDocFromServer, doc, setDoc, increment } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -51,12 +51,24 @@ const normalizeText = (text: string) => {
     .toLowerCase();
 };
 
+const getFallbackImageUrl = (link?: string) => {
+  if (!link) return null;
+  try {
+    const url = new URL(link);
+    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=128`;
+  } catch (e) {
+    return null;
+  }
+};
+
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 
 function GroupCard({ group, requested, onRequest }: { group: Group, requested: boolean, onRequest: () => void }) {
+  const imgSource = group.imageUrl || getFallbackImageUrl(group.joinLink);
+
   return (
     <div 
       className="group bg-[#202c33] rounded-xl sm:rounded-3xl overflow-hidden flex flex-col border border-[#38464e]/30 hover:border-[#00a884]/50 transition-colors duration-200 shrink-0 w-[24vw] sm:w-[140px] lg:w-[150px]"
@@ -64,12 +76,18 @@ function GroupCard({ group, requested, onRequest }: { group: Group, requested: b
       {/* Cover Image */}
       <div className="relative aspect-square w-full">
         <div className="absolute inset-0 bg-gradient-to-t from-[#202c33] to-transparent z-10 opacity-50"></div>
-        <img 
-          src={group.imageUrl} 
-          alt={group.title}
-          loading="lazy"
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {imgSource ? (
+          <img 
+            src={imgSource} 
+            alt={group.title}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 w-full h-full bg-[#111b21] flex items-center justify-center">
+            <span className="text-[#00a884] text-3xl font-bold">{group.title.charAt(0).toUpperCase()}</span>
+          </div>
+        )}
       </div>
 
       {/* Card Content */}
@@ -114,6 +132,8 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [requestedLinks, setRequestedLinks] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const [authLoaded, setAuthLoaded] = useState(false);
 
@@ -122,6 +142,18 @@ export default function App() {
     window.history.pushState({}, '', url);
     setCurrentView(view);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleRequestLink = async (group: Group) => {
     if (requestedLinks.has(group.id)) return;
@@ -363,16 +395,58 @@ export default function App() {
           }
 
           return (
-            <div className="space-y-8 sm:space-y-12">
-              <div className="relative max-w-xl mx-auto mb-8 sm:mb-12">
+            <div className="space-y-6 sm:space-y-8">
+              <div ref={searchRef} className="relative max-w-xl mx-auto mb-4 sm:mb-6 z-50">
                 <input
                   type="text"
                   placeholder="Search groups and projects..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
                   className="w-full bg-[#202c33] text-white px-5 py-3.5 sm:py-4 rounded-2xl border border-[#38464e] focus:border-[#00a884] focus:outline-none focus:ring-1 focus:ring-[#00a884] placeholder-[#8696a0] transition-colors shadow-lg"
                 />
                 <Search className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 text-[#8696a0]" size={20} />
+                
+                {showSuggestions && searchQuery.trim() && filteredGroups.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#202c33] border border-[#38464e] rounded-xl shadow-2xl overflow-hidden z-[100] max-h-60 overflow-y-auto">
+                    {(() => {
+                      const uniqueGroups = filteredGroups.reduce((acc, curr) => {
+                        if (!acc.find(g => g.title === curr.title)) acc.push(curr);
+                        return acc;
+                      }, [] as typeof filteredGroups).slice(0, 8);
+                      
+                      return uniqueGroups.map((group, idx) => {
+                        const imgSource = group.imageUrl || getFallbackImageUrl(group.joinLink);
+                        
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setSearchQuery(group.title);
+                              setShowSuggestions(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-[#e9edef] hover:bg-[#2a3942] transition-colors border-b border-[#38464e]/50 last:border-b-0 flex items-center gap-3"
+                          >
+                            {imgSource ? (
+                              <img src={imgSource} alt={group.title} className="w-10 h-10 rounded-full object-cover shrink-0 border border-[#38464e]" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-[#111b21] flex items-center justify-center shrink-0 border border-[#38464e]">
+                                <span className="text-[#00a884] text-lg font-bold">{group.title.charAt(0).toUpperCase()}</span>
+                              </div>
+                            )}
+                            <div className="flex flex-col overflow-hidden">
+                              <span className="truncate font-medium">{group.title}</span>
+                              <span className="text-xs text-[#8696a0] truncate">{group.community || 'Group'}</span>
+                            </div>
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
+                )}
               </div>
 
               {filteredGroups.length === 0 ? (
@@ -380,7 +454,7 @@ export default function App() {
                   <p className="text-[#8696a0] text-lg">No groups or projects found for "{searchQuery}"</p>
                 </div>
               ) : (
-                <div className="space-y-12 sm:space-y-16">
+                <div className="space-y-6 sm:space-y-8">
                   {(() => {
                     const mostActive = filteredGroups.filter(g => g.isMostActive);
                     if (mostActive.length === 0) return null;

@@ -64,7 +64,7 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
           imageUrl: data.image || prev?.imageUrl || ''
         }));
       } else {
-        alert(data.error || "Could not fetch info. Make sure it's a valid WhatsApp link.");
+        alert(data.error || "Could not fetch info. Make sure it's a valid link.");
       }
     } catch (err: any) {
       console.error(err);

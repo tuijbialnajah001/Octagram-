@@ -19,8 +19,8 @@ async function startServer() {
 
     try {
       // Basic validation
-      if (!url.includes('chat.whatsapp.com/')) {
-        return res.status(400).json({ error: "Invalid WhatsApp group link" });
+      if (!url || typeof url !== 'string' || url.trim() === '') {
+        return res.status(400).json({ error: "Invalid link format" });
       }
 
       // Add https:// if missing
