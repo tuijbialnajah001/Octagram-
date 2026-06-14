@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, FC } from 'react';
 import { collection, onSnapshot, query, where, getDocFromServer, doc, setDoc, increment } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -66,7 +66,7 @@ import { EffectCoverflow } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 
-function GroupCard({ group, requested, onRequest }: { group: Group, requested: boolean, onRequest: () => void }) {
+const GroupCard: FC<{ group: Group, requested: boolean, onRequest: () => void | Promise<void> }> = ({ group, requested, onRequest }) => {
   const imgSource = group.imageUrl || getFallbackImageUrl(group.joinLink);
 
   return (
@@ -132,6 +132,7 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [requestedLinks, setRequestedLinks] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'groups' | 'projects'>('groups');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -359,6 +360,35 @@ export default function App() {
           )}
           </div>
         </div>
+        
+        {currentView === 'home' && (
+          <div className="border-t border-[#202c33] bg-[#111b21] shadow-md">
+            <div className="max-w-xl mx-auto px-4 flex justify-center py-3">
+              <div className="bg-[#202c33] p-1 rounded-2xl flex gap-1 border border-[#38464e]/50 shadow w-full text-center">
+                <button
+                  onClick={() => setActiveTab('groups')}
+                  className={`flex-1 py-2 sm:py-2.5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 ${
+                    activeTab === 'groups'
+                      ? 'bg-[#00a884] text-[#111b21] shadow-md'
+                      : 'text-[#8696a0] hover:text-[#e9edef] hover:bg-[#2a3942]'
+                  }`}
+                >
+                  Groups
+                </button>
+                <button
+                  onClick={() => setActiveTab('projects')}
+                  className={`flex-1 py-2 sm:py-2.5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 ${
+                    activeTab === 'projects'
+                      ? 'bg-[#00a884] text-[#111b21] shadow-md'
+                      : 'text-[#8696a0] hover:text-[#e9edef] hover:bg-[#2a3942]'
+                  }`}
+                >
+                  Projects
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
@@ -376,10 +406,14 @@ export default function App() {
           </div>
         ) : (() => {
           const normalizedSearch = normalizeText(searchQuery);
-          const filteredGroups = groups.filter(g =>
+          const baseFiltered = groups.filter(g =>
             normalizeText(g.title).includes(normalizedSearch) ||
             normalizeText(g.description).includes(normalizedSearch) ||
             (g.community && normalizeText(g.community).includes(normalizedSearch))
+          );
+
+          const filteredGroups = baseFiltered.filter(g => 
+            activeTab === 'projects' ? g.community === 'Projects' : g.community !== 'Projects'
           );
 
           if (groups.length === 0) {
@@ -503,7 +537,7 @@ export default function App() {
               );
             })()}
 
-            {COMMUNITIES.map(community => {
+            {COMMUNITIES.filter(c => activeTab === 'projects' ? c === 'Projects' : c !== 'Projects').map(community => {
               const communityGroups = filteredGroups.filter(g => g.community === community || (!g.community && community === COMMUNITIES[0]));
               if (communityGroups.length === 0) return null;
               
