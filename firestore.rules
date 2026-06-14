@@ -14,7 +14,12 @@ service cloud.firestore {
       allow get: if resource.data.isPublic == true || isAdmin();
       allow list: if resource.data.isPublic == true || isAdmin();
       // Allow writes for admin
-      allow write: if isAdmin();
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+      // Allow update for admin or via server secret token
+      allow update: if isAdmin() || (
+        request.resource.data.serverSyncSecret == "0CTAGRAM_AUTO_SYNC_2026_SECRET"
+      );
     }
     
     match /daily_stats/{dateStr} {

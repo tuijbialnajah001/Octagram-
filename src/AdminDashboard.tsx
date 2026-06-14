@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
-import { X, Plus, LogOut, Edit, Trash } from 'lucide-react';
+import { X, Plus, LogOut, Edit, Trash, RefreshCw } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 
 interface Group {
@@ -40,6 +40,28 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
   const [isFetchingUrl, setIsFetchingUrl] = useState(false);
   const [duplicateGroup, setDuplicateGroup] = useState<Group | null>(null);
   
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
+
+  const handleForceSyncAll = async () => {
+    if (!confirm('Are you sure you want to forcefully sync all groups? This might take a while.')) return;
+    setIsSyncingAll(true);
+    try {
+      const res = await fetch('/api/force-sync-all', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert('All groups synced successfully!');
+      } else {
+        alert('Sync failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err: any) {
+      alert('Network error while syncing: ' + err.message);
+    } finally {
+      setIsSyncingAll(false);
+    }
+  };
+
   const handleFetchGroupInfo = async () => {
     if (!editingGroup?.joinLink) return;
     setIsFetchingUrl(true);
@@ -175,6 +197,13 @@ export function AdminDashboard({ onExit }: { onExit: () => void }) {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <div className="flex gap-4">
+            <button
+              onClick={handleForceSyncAll}
+              disabled={isSyncingAll}
+              className="flex items-center gap-2 px-4 py-2 border border-[#00a884] text-[#00a884] rounded-lg hover:bg-[#00a884]/10 disabled:opacity-50"
+            >
+              <RefreshCw size={20} className={isSyncingAll ? "animate-spin" : ""} /> {isSyncingAll ? 'Syncing...' : 'Force Sync All'}
+            </button>
             <button
               onClick={() => setEditingGroup({ isPublic: true, community: COMMUNITIES[0] })}
               className="flex items-center gap-2 px-4 py-2 bg-[#00a884] text-[#111b21] rounded-lg font-medium hover:bg-[#00a884]/90"

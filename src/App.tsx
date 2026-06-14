@@ -340,15 +340,19 @@ export default function App() {
             𝗢𝗖𝗧Λ𝗚𝗥Λ𝗠
           </h1>
           <div className="flex-1 flex justify-end gap-2">
-          {deferredPrompt && (
-            <button
-              onClick={handleInstallClick}
-              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#00a884] text-[#111b21] rounded-full text-sm font-bold hover:bg-[#00c59b] transition-colors shadow-lg shadow-[#00a884]/20"
-            >
-              <Download size={16} />
-              <span className="hidden sm:inline">Install App</span>
-            </button>
-          )}
+          <button
+            onClick={() => {
+              if (deferredPrompt) {
+                handleInstallClick();
+              } else {
+                alert("To install the app, tap your browser's menu and select 'Add to Home Screen' or 'Install app'.");
+              }
+            }}
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#00a884] text-[#111b21] rounded-full text-sm font-bold hover:bg-[#00c59b] transition-colors shadow-lg shadow-[#00a884]/20"
+          >
+            <Download size={16} />
+            <span className="hidden sm:inline">Install App</span>
+          </button>
           {isAdminUser && (
             <button
               onClick={() => navigateTo('admin')}
